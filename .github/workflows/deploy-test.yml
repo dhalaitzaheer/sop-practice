@@ -40,4 +40,4 @@ jobs:
           echo "Deploying ${GITHUB_SHA} to Test"
 
       - name: Health check (simulated)
-        run: test -f build/app-${GITHUB_SHA}.tar.gz
+        run: test -f build/does-not-exist.tar.gz
