@@ -1,0 +1,43 @@
+name: Deploy Test
+
+on:
+  push:
+    branches: [develop]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-test
+  cancel-in-progress: false
+
+jobs:
+  deploy-test:
+    name: Deploy to Test
+    runs-on: ubuntu-latest
+    environment: test
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build artifact
+        run: |
+          mkdir -p build
+          tar -czf build/app-${GITHUB_SHA}.tar.gz README.md CONTRIBUTING.md
+          echo "Built app-${GITHUB_SHA}.tar.gz"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-${{ github.sha }}
+          path: build/
+
+      - name: Deploy (simulated)
+        env:
+          TEST_APP_URL: ${{ secrets.TEST_APP_URL }}
+        run: |
+          test -n "$TEST_APP_URL"
+          echo "Deploying ${GITHUB_SHA} to Test"
+
+      - name: Health check (simulated)
+        run: test -f build/app-${GITHUB_SHA}.tar.gz
